@@ -14,10 +14,10 @@ class Square extends React.Component {
 class Advancer extends React.Component {
 	render() {
 		return (
-			<button className="advancer" onClick={ () => alert('click') } >
+			<button className="advancer" onClick={ () => this.props.onClick() } >
 			Advance
-			</button>
-		);
+			</button>//
+	  );
 	}
 }
 
@@ -25,7 +25,8 @@ class Board extends React.Component {
 	constructor(props){
 		super(props);
 		this.state = {
-			squares:  Array(9).fill(false),
+      frame: 0,
+      squares: Array(props.width).fill(false).fill(true, props.width / 2, props.width / 2 + 1),
 		};
 	}
 
@@ -37,45 +38,54 @@ class Board extends React.Component {
 
   renderSquare(i) {
     return (
-    	<Square 
+    	<Square key={i.toString()}
     		value={this.state.squares[i]} 
     		onClick={() => this.handleClick(i)}
     	/>
     );
   }
 
+  advance(){
+    this.setState((state, props) => ({ 
+      frame: state.frame + 1,
+    }));
+  }
+
   render() {
-    const status = 'Next player: X';
+    
+    const list = this.state.squares.map((value, index) => {
+              return this.renderSquare(index);
+              });
 
     return (
-      <div>
-        <div className="status">{status}</div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
+        <div className="board">
+          <div className="controls"> 
+            <div className="status">{this.state.frame}</div><Advancer onClick={() => this.advance()} />
+          </div>
+           {list} 
         </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
-      </div>
-    );
+    )
   }
 }
 
 class Game extends React.Component {
+
+  constructor(props){
+    super(props);
+    this.state = {
+      history: [{
+        squares: Array(props.width).fill(false).fill(true, props.width / 2, props.width / 2 + 1),
+      }],
+    };
+  }
   render() {
+    const history = this.state.history;
+    const current = history[history.length - 1];
+
     return (
       <div className="game">
         <div className="game-board">
-          <Board />
+          <Board width={this.props.width} />
         </div>
         <div className="game-info">
           <div>{/* status */}</div>
@@ -89,7 +99,7 @@ class Game extends React.Component {
 // ========================================
 
 ReactDOM.render(
-  <Game />,
+  <Game width={9} />,
   document.getElementById('root')
 );
 
