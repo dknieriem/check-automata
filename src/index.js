@@ -63,15 +63,11 @@ function applyRule(neighbors, rule)
   }
 
   // Rule 27 = 16 + 8 + 2 + 1 
-  // 0 0 0 1 1 0 1 1
-  // 
   // Rule 90 = 0 1 0 1 1 0 1 0
   const neighborNum = neighbors[0] * 4 + neighbors[1] * 2 + neighbors[2];
-  //0 + 0 + 1 = 1 
-  //2 ^ 0 = 1
   
   const match = Math.pow( 2, neighborNum ) & rule;
-  console.log("ApplyRule: " , neighborNum, Math.pow(2, neighborNum), rule, match);
+  //console.log("ApplyRule: " , neighborNum, Math.pow(2, neighborNum), rule, match);
   return match ? true : false ;
 }
 
@@ -87,11 +83,6 @@ class Game extends React.Component {
       squares: Array(props.width).fill(false).fill(true, props.width / 2, props.width / 2 + 1),
       rule: this.props.rule,
     };
-
-    //check rules
-    
-   //console.log("Rule #" + this.props.rule);
-
   }
 
   advance(){
@@ -99,7 +90,6 @@ class Game extends React.Component {
     const history = this.state.history;
     const current = history[history.length - 1];
     const oldSquares = current.squares;
-    //console.log(oldSquares);
 
     const newSquares = oldSquares.map( (x, index) => {
       
@@ -108,10 +98,7 @@ class Game extends React.Component {
       }
 
       var neighbors = [ oldSquares[index - 1], oldSquares[index], oldSquares[index+1] ];
-      //console.log(neighbors);
       var newVal = applyRule( neighbors, this.state.rule );
-      
-      //console.log(x, index, newVal);
 
       return newVal;
        
@@ -145,18 +132,11 @@ class Game extends React.Component {
         <div className="game-board">
           <Board squares={ current.squares } />
         </div>
-        <div className="game-info">
-          <div>{/* status */}</div>
-          <ol>{/* TODO */}</ol>
-        </div>
       </div>//
     );
   }
 }
 
-// ========================================
-// Rule 27 = 16 + 8 + 2 + 1 
-// 0 0 0 1 1 0 1 1
 ReactDOM.render(
   <Game width={50} rule={90} />,
   document.getElementById('root')
