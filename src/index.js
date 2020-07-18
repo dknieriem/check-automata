@@ -64,13 +64,15 @@ function applyRule(neighbors, rule)
 
   // Rule 27 = 16 + 8 + 2 + 1 
   // 0 0 0 1 1 0 1 1
+  // 
+  // Rule 90 = 0 1 0 1 1 0 1 0
   const neighborNum = neighbors[0] * 4 + neighbors[1] * 2 + neighbors[2];
-  //0 + 0 + 0 = 0 
+  //0 + 0 + 1 = 1 
   //2 ^ 0 = 1
   
   const match = Math.pow( 2, neighborNum ) & rule;
-  //console.log("ApplyRule: " , neighborNum, match);
-  return match;
+  console.log("ApplyRule: " , neighborNum, Math.pow(2, neighborNum), rule, match);
+  return match ? true : false ;
 }
 
 class Game extends React.Component {
@@ -107,7 +109,7 @@ class Game extends React.Component {
 
       var neighbors = [ oldSquares[index - 1], oldSquares[index], oldSquares[index+1] ];
       //console.log(neighbors);
-      var newVal = applyRule( neighbors, this.props.rule );
+      var newVal = applyRule( neighbors, this.state.rule );
       
       //console.log(x, index, newVal);
 
@@ -156,7 +158,7 @@ class Game extends React.Component {
 // Rule 27 = 16 + 8 + 2 + 1 
 // 0 0 0 1 1 0 1 1
 ReactDOM.render(
-  <Game width={50} rule={27} />,
+  <Game width={50} rule={90} />,
   document.getElementById('root')
 );
 
