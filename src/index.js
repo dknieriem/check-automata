@@ -47,28 +47,11 @@ class Board extends React.Component {
     return (
         <div className="board">
           <div className="boxList flex justify-center">
-            {list} 
+            { list } 
           </div>
         </div>//
     )
   }
-}
-
-function applyRule(neighbors, rule)
-{
-
-  if( !Array.isArray(neighbors) || neighbors.length !== 3 )
-  {
-    return false;
-  }
-
-  // Rule 27 = 16 + 8 + 2 + 1 
-  // Rule 90 = 0 1 0 1 1 0 1 0
-  const neighborNum = neighbors[0] * 4 + neighbors[1] * 2 + neighbors[2];
-  
-  const match = Math.pow( 2, neighborNum ) & rule;
-  //console.log("ApplyRule: " , neighborNum, Math.pow(2, neighborNum), rule, match);
-  return match ? true : false ;
 }
 
 class Game extends React.Component {
@@ -82,7 +65,25 @@ class Game extends React.Component {
       frame: 0,
       squares: Array(props.width).fill(false).fill(true, props.width / 2, props.width / 2 + 1),
       rule: this.props.rule,
+      wrap: this.props.wrap,
+      multiline: this.props.multiline
     };
+  }
+
+  applyRule(neighbors, rule){
+
+    if( !Array.isArray(neighbors) || neighbors.length !== 3 )
+    {
+      return false;
+    }
+
+    // Rule 27 = 16 + 8 + 2 + 1 
+    // Rule 90 = 0 1 0 1 1 0 1 0
+    const neighborNum = neighbors[0] * 4 + neighbors[1] * 2 + neighbors[2];
+    
+    const match = Math.pow( 2, neighborNum ) & rule;
+    //console.log("ApplyRule: " , neighborNum, Math.pow(2, neighborNum), rule, match);
+    return match ? true : false ;
   }
 
   advance(){
@@ -93,12 +94,17 @@ class Game extends React.Component {
 
     const newSquares = oldSquares.map( (x, index) => {
       
-      if( index === 0 || index  === this.props.width - 1 ){
-        return false;
+      var neighbors;
+
+      if( index === 0 ){
+        neighbors = [ false, oldSquares[index], oldSquares[index+1] ];
+      } else if ( index  === this.props.width - 1 ){
+        neighbors = [ oldSquares[index - 1], oldSquares[index], 0 ];
+      } else {
+        neighbors = [ oldSquares[index - 1], oldSquares[index], oldSquares[index+1] ];
       }
 
-      var neighbors = [ oldSquares[index - 1], oldSquares[index], oldSquares[index+1] ];
-      var newVal = applyRule( neighbors, this.state.rule );
+      var newVal = this.applyRule( neighbors, this.state.rule );
 
       return newVal;
        
@@ -114,14 +120,33 @@ class Game extends React.Component {
 
   }
 
+
+
   newRule( event ){
     this.setState({ rule: event.target.value });
   }
 
+  renderBoard(i) {
+    return (
+      <Board squares={ i.squares } />//
+    );
+  }
+
   render() {
+
     const history = this.state.history;
     const current = history[history.length - 1];
 
+    var list;
+
+    if(this.state.multiline ){
+      list = history.map((value, index) => {
+                return this.renderBoard(value);
+      });
+    } else {
+      list = this.renderBoard(current);
+    }
+    
     return (
       <div className="game mt-10 container mx-auto">
           <div className="controls flex flex-row bg-gray-200"> 
@@ -130,7 +155,7 @@ class Game extends React.Component {
             <Advancer onClick={() => this.advance()} />
           </div>
         <div className="game-board">
-          <Board squares={ current.squares } />
+          { list }
         </div>
       </div>//
     );
@@ -138,7 +163,7 @@ class Game extends React.Component {
 }
 
 ReactDOM.render(
-  <Game width={50} rule={90} />,
+  <Game width={ 50 } rule={ 90 } wrap={ true } multiline={ true } />,
   document.getElementById('root')
 );
 
