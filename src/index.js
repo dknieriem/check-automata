@@ -30,24 +30,37 @@ class RuleInput extends React.Component {
 
 class Board extends React.Component {
 
-  renderSquare(i) {
+  renderSquare(row, col) {
+    var index = row * this.props.width + col;
     return (
-    	<Square key={i.toString()}
-    		value={this.props.squares[i]} 
+    	<Square key={ index.toString() }
+    		value={this.props.squares[row][col]} 
     	/>//
     );
   }
 
+  renderRow(row) {
+    const list = this.props.squares[row].map((value, index) => {
+      return this.renderSquare(row, index);
+     });
+       
+        return (
+          <div key={ row } className={ "row row-" + row + " h-5"}>
+          { list }
+          </div>//
+        );
+  }
+
   render() {
     
-    const list = this.props.squares.map((value, index) => {
-              return this.renderSquare(index);
-              });
+    const rows = this.props.squares.map( (row, index)  => {
+        return this.renderRow( index );
+    });
 
     return (
         <div className="board">
-          <div className="boxList flex justify-center">
-            { list } 
+          <div className="rowList flex flex-col justify-center">
+            { rows } 
           </div>
         </div>//
     )
@@ -58,15 +71,24 @@ class Game extends React.Component {
 
   constructor(props){
     super(props);
+    var height = this.props.height ?? 1;
+    var squares = Array(height).fill(false).map( row => new Array(props.width).fill(false) ); 
+    
+    if ( this.props.start === "center" ) {
+      squares[height / 2 ][props.width / 2] = true; //.fill(true, props.width / 2, props.width / 2 + 1)
+    }
+
     this.state = {
+      squares: squares,
       history: [{
-        squares: Array(props.width).fill(false).fill(true, props.width / 2, props.width / 2 + 1),
+        squares: squares
       }],
       frame: 0,
-      squares: Array(props.width).fill(false).fill(true, props.width / 2, props.width / 2 + 1),
       rule: this.props.rule,
       wrap: this.props.wrap,
-      multiline: this.props.multiline
+      multiline: this.props.multiline,
+      width: this.props.width,
+      height: this.props.height
     };
   }
 
@@ -83,10 +105,10 @@ class Game extends React.Component {
     
     const match = Math.pow( 2, neighborNum ) & rule;
     //console.log("ApplyRule: " , neighborNum, Math.pow(2, neighborNum), rule, match);
-    return match ? true : false ;
+    return match ? true : false;
   }
 
-  advance(){
+  advance1d(){
 
     const history = this.state.history;
     const current = history[history.length - 1];
@@ -120,7 +142,31 @@ class Game extends React.Component {
 
   }
 
+  advance2d(){
+    const history = this.state.history;
+    const current = history[history.length - 1];
+    const oldSquares = current.squares;
 
+    const newSquares = oldSquares.map ( (row, index) => {
+      row.map( ( col, colIndex) => {
+        //console.log(row, col);
+        return this.applyRule
+        
+      });
+    });
+
+
+  }
+
+  advance(){
+
+   if(this.props.height && this.props.height > 1){
+     this.advance2d();
+   } else {
+     this.advance1d();
+   }
+
+  }
 
   newRule( event ){
     this.setState({ rule: event.target.value });
@@ -128,7 +174,7 @@ class Game extends React.Component {
 
   renderBoard(i) {
     return (
-      <Board squares={ i.squares } />//
+      <Board squares={ i.squares } width={ this.props.width } />//
     );
   }
 
@@ -139,7 +185,7 @@ class Game extends React.Component {
 
     var list;
 
-    if(this.state.multiline ){
+    if(this.state.height ){
       list = history.map((value, index) => {
                 return this.renderBoard(value);
       });
@@ -163,7 +209,7 @@ class Game extends React.Component {
 }
 
 ReactDOM.render(
-  <Game width={ 50 } rule={ 90 } wrap={ true } multiline={ true } />,
+  <Game width={ 50 } height={50} rule={ 90 } wrap={ true } start={ "center" }/>,
   document.getElementById('root')
 );
 
